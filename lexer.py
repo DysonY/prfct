@@ -51,8 +51,9 @@ class Lexer:
         self.tokens = []
 
 
-    def lex_error(self):
+    def lex_error(self, msg):
         print(f"Lexing error on line {self.line_idx}")
+        print(msg)
 
 
     def lookahead(self):
@@ -112,7 +113,7 @@ class Lexer:
             self.tokens.append(op_of_str(s))
         else:
             print(s)
-            self.lex_error()
+            self.lex_error('-> Invalid operator')
 
 
     def match_semi(self):
@@ -127,6 +128,9 @@ class Lexer:
             self.check_eof()
             if self.eof_reached:
                 break
+            if is_ident_start(self.code_str[self.char_idx]):
+                print(self.code_str[self.char_idx])
+                self.lex_error('-> Invalid literal')
         self.tokens.append(''.join(digits))
 
 
