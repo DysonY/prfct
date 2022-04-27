@@ -1,0 +1,25 @@
+statement ::= ident, assign-op, expression
+            | "if", condition, "{", { statement }, "}"
+            | "for", statement, ";", condition, ";", expression
+
+condition ::= expression, cmp-op, expression
+
+expression ::= factor, { unary-op, factor }
+             | atom-op, factor
+
+factor ::= ident
+         | literal
+         | "(", expression, ")"
+
+cmp-op ::= "==" | "<" | ">" | "<=" | ">=" | "!="
+
+assign-op ::= "=" | "+=" | "-=" | "*=" | "/="
+
+unary-op ::= "+" | "-" | "*" | "/"
+
+atom-op ::= "!"
+
+ident ::= letter, { letter | digit }
+
+literal ::= digit, { digit }
+
