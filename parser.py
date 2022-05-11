@@ -42,17 +42,11 @@ class Parser:
 
 
     def accept(self, s):
-        # s is a literal
-        if s <= 0 and self.sym <= 0:
-            self.prev = self.sym
-            self.next_sym()
-            return True
-        # s is an identifier
-        elif s >= 100 and self.sym > 100:
-            self.prev = self.sym
-            self.next_sym()
-            return True
-        elif self.sym == s:
+        # s is a literal, identifier, or match
+        if (s <= 0 and self.sym <= 0) or \
+            (s >= 100 and self.sym > 100) or \
+            (self.sym == s):
+
             self.prev = self.sym
             self.next_sym()
             return True
