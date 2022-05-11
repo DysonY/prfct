@@ -64,7 +64,7 @@ class Parser:
         if self.accept(IDF):
             return Node(9, self.prev, [])
         elif self.accept(LIT):
-            return Node(10, self.prev, [])
+            return Node(10, -1 * self.prev, [])
         elif self.accept(LPAREN):
             expr = self.expression()
             expect(RPAREN)
@@ -179,6 +179,10 @@ class Parser:
 
     def parse(self):
         self.node = self.block()
+
+
+    def get_ast(self):
+        return self.node
 
 
     def print_ast(self):

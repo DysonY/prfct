@@ -30,7 +30,7 @@ class Node:
 
 def print_literal(node, depth, identifiers):
     print('  ' * depth, end='Lit: ')
-    print(-1 * node.token)
+    print(node.token)
 
 
 def print_ident(node, depth, identifiers):
