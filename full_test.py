@@ -11,6 +11,6 @@ with open('test.txt', 'r') as src:
     cgen = CodeGenerator(parser.get_ast(), swap_dict(identifiers))
     output = cgen.generate()
     cgen.print_info()
-    print('\n===== FULL OUTPUT =====')
-    print(output)
+    #print('\n===== FULL OUTPUT =====')
+    #print(output)
 

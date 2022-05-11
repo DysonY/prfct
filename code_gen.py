@@ -23,7 +23,7 @@ class CodeGenerator:
         self.lit_aliases = dict()  # { int : str }
         self.curr_local = 0
         self.lines = ['def main():']
-        self.reserved_fns = set()
+        self.reserved_fns = { '_add', '_sub', '_mul', '_div' }
 
         self.assign_fns = {
             EQ : '_copy',
@@ -48,6 +48,11 @@ class CodeGenerator:
             TIMES : '_mul',
             DIV : '_div'
         }
+
+
+    # Reserve a function handle
+    def reserve(self, s):
+        self.reserved_fns.add(s)
 
 
     def add_line(self, line):
@@ -117,6 +122,7 @@ class CodeGenerator:
             return self.idf_aliases[first.token]
         elif first.node_type == 8: # atom-op check
             fact = self.gen_expr(node.children[1])
+            self.reserve('_not')
             return '_not({fact})'
         else:
             # TODO account for multiple unary ops
@@ -163,6 +169,7 @@ class CodeGenerator:
         self.add_line(('  ') * depth + f'{local2} = {expr_str2}')
 
         cmp_fn = self.cmp_fns[op.token]
+        self.reserve(cmp_fn)
         self.add_line(('  ') * depth + f'{cond_var} = {cmp_fn}({local1}, {local2})')
         return cond_var
 
@@ -182,6 +189,7 @@ class CodeGenerator:
         expr = node.children[2].children[0]
         idf_alias = self.idf_aliases[idf.token]
         op_fn = self.assign_fns[op.token]
+        self.reserve(op_fn)
         if self.is_literal(expr):
             lit_fn = self.lit_aliases[expr.token]
             self.add_line(('  ' * depth) +
@@ -221,6 +229,7 @@ class CodeGenerator:
         self.add_line(('  ' * (depth + 2)) + recover_idx_str)
 
         self.gen_block(block, depth + 1)
+        self.reserve(op_fn)
 
 
     def gen_stmt(self, node, depth):
@@ -255,6 +264,7 @@ class CodeGenerator:
         print('\n===== CODE GEN LOGGING =====')
         print('Literal aliases:', self.lit_aliases)
         print('Identifier aliases:', self.idf_aliases)
+        print('Reserved functions:', self.reserved_fns)
         print('Output:')
         print('\n'.join(self.lines))
 
