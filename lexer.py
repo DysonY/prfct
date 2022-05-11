@@ -167,7 +167,8 @@ class Lexer:
 
 
     def print_info(self):
-        print(self.tokens)
+        #print(self.tokens)
+        print('===== LEXICAL ANALYSIS =====')
         print('Lines:', self.line_idx)
         print('Identifiers:', self.identifiers)
         print('Tokens: ', end='')
@@ -177,8 +178,8 @@ class Lexer:
                 token_strs.append('IDF')
             else:
                 token_strs.append(str_of_token(t))
-        print(token_strs)
-        print(self.code_str)
+        print(token_strs, end='\n\n')
+        #print(self.code_str)
 
 
 #with open('test.txt', 'r') as src:

@@ -188,6 +188,7 @@ class Parser:
 
 
     def print_ast(self):
+        print('===== ABSTRACT SYNTAX TREE =====')
         print_tree(self.node, 0, swap_dict(self.identifiers))
 
 
