@@ -29,36 +29,40 @@ class Node:
 
 
 def print_literal(node, depth, identifiers):
-    #print('  ' * depth, end='Lit: ')
-    print(-1 * node.token, end=' ')
+    print('  ' * depth, end='Lit: ')
+    print(-1 * node.token)
 
 
 def print_ident(node, depth, identifiers):
-    #print('  ' * depth, end='Idf: ')
-    print(identifiers[node.token], end=' ')
+    print('  ' * depth, end='Idf: ')
+    print(identifiers[node.token])
 
 
 def print_atom_op(node, depth, identifiers):
     assert node.node_type == 8
-    #print('  ' * depth, end='Not\n')
-    print('!', end='')
+    print('  ' * depth, end='')
+    print('Op: !', end='')
 
 
 def print_unary_op(node, depth, identifiers):
     assert (node.token >= 50) and (node.token <= 59)
-    #print('  ' * depth, end='')
-    print(unary_ops[node.token - PLUS], end=' ')
+    print('  ' * depth, end='')
+    print('Op: ', end='')
+    print(unary_ops[node.token - PLUS])
 
 
 def print_assign_op(node, depth, identifiers):
     assert (node.token >= 40) and (node.token <= 49)
-    #print('  ' * depth, end='')
-    print(assign_ops[node.token - EQ], end=' ')
+    print('  ' * depth, end='')
+    print('Op: ', end='')
+    print(assign_ops[node.token - EQ])
 
 
 def print_cmp_op(node, depth, identifiers):
     assert (node.token >= 30) and (node.token <= 39)
-    print(cmp_ops[node.token - EQEQ], end=' ')
+    print('  ' * depth, end='')
+    print('Op: ', end='')
+    print(cmp_ops[node.token - EQEQ])
 
 
 def print_factor(node, depth, identifiers):
@@ -71,32 +75,32 @@ def print_factor(node, depth, identifiers):
 
 
 def print_expr(node, depth, identifiers):
-    print('Expr: ')
+    print('  ' * depth, end='Expr: \n')
     for child in node.children:
         print_tree(child, depth + 1, identifiers)
-    print()
+    #print()
 
 
 def print_cond(node, depth, identifiers):
-    print('Cond: ')
+    print('  ' * depth, end='Cond: \n')
     print_expr(node.children[0], depth + 1, identifiers)
     print_cmp_op(node.children[1], depth + 1, identifiers)
     print_expr(node.children[2], depth + 1, identifiers)
-    print()
+    #print()
 
 
 def print_stmt(node, depth, identifiers):
-    print('Stmt: ')
+    print('  ' * depth, end='Stmt: \n')
     for child in node.children:
         print_tree(child, depth + 1, identifiers)
-    print()
+    #print()
 
 
 def print_block(node, depth, identifiers):
-    print('Block: ')
+    print('  ' * depth, end='Block: \n')
     for child in node.children:
         print_stmt(child, depth + 1, identifiers)
-    print()
+    #print()
 
 
 print_fns = [

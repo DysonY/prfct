@@ -114,6 +114,7 @@ ops = {
 
 unary_ops = ['+', '-', '*', '/']
 assign_ops = ['=', '+=', '-=', '*=', '/=']
+cmp_ops = ['==', '<', '>', '<=', '>=', '!=']
 
 
 def str_of_token(token):

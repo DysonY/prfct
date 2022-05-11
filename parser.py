@@ -3,6 +3,11 @@ from tokens import *
 from ast import Node, print_tree
 
 
+# Swap keys and values of dictionary, assuming both are hashable types
+def swap_dict(d):
+    return dict((v, k) for k,v in d.items())
+
+
 class ParseError(Exception):
     pass
 
@@ -107,9 +112,9 @@ class Parser:
 
     def loop_step(self):
         self.accept(IDF)
-        idf = self.prev
+        idf = Node(9, self.prev, [])
         if self.sym in {EQ, PLSEQ, MINEQ, TIMEQ, DIVEQ}:
-            op = self.sym
+            op = Node(6, self.sym, [])
             self.next_sym()
             expr = self.expression()
             return Node(1, NONTERM, [idf, op, expr])
@@ -119,10 +124,10 @@ class Parser:
 
     def statement(self):
         if self.accept(INT):
-            idf = self.sym
+            idf = Node(9, self.sym, [])
             self.next_sym()
             if self.sym in {EQ, PLSEQ, MINEQ, TIMEQ, DIVEQ}:
-                op = self.sym
+                op = Node(6, self.sym, [])
                 self.next_sym()
                 expr = self.expression()
                 self.expect(SEMI)
@@ -131,9 +136,9 @@ class Parser:
                 self.parse_error('Syntax error: Expected assignment operator')
 
         elif self.accept(IDF):
-            idf = self.prev
+            idf = Node(9, self.prev, [])
             if self.sym in {EQ, PLSEQ, MINEQ, TIMEQ, DIVEQ}:
-                op = self.sym
+                op = Node(6, self.sym, [])
                 self.next_sym()
                 expr = self.expression()
                 self.expect(SEMI)
@@ -183,6 +188,6 @@ class Parser:
 
 
     def print_ast(self):
-        print_tree(self.node, 0, self.identifiers)
+        print_tree(self.node, 0, swap_dict(self.identifiers))
 
 
