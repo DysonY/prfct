@@ -4,6 +4,7 @@ from ast import Node, print_tree
 
 # Identifier aliases begin with _idf
 # Literal aliases begin with _lit
+# TODO merge assign_fns, cmp_fns, unary_fns into a single op_fns dictionary
 
 
 # 0 -> a, 1 -> b, 2 -> c, etc.
@@ -29,6 +30,22 @@ class CodeGenerator:
             MINEQ : '_copysub',
             TIMEQ : '_copymul',
             DIVEQ : '_copydiv'
+        }
+
+        self.cmp_fns = {
+            EQEQ : '_eq',
+            LT : '_lt',
+            GT : '_gt',
+            LTE : '_lte',
+            GTE : '_gte',
+            NEQ : '_neq'
+        }
+
+        self.unary_fns = {
+            PLUS : '_add',
+            MINUS : '_sub',
+            TIMES : '_mul',
+            DIV : '_div'
         }
 
 
@@ -67,19 +84,80 @@ class CodeGenerator:
         return node.node_type == 10
 
 
+    def is_ident(self, node):
+        return node.node_type == 9
+
+
     def gen_expr(self, node):
-        return '(expr)'
+        # Leaf node check
+        if len(node.children) == 0:
+            if self.is_literal(node):
+                return self.lit_aliases[node.token] + '()'
+            elif self.is_ident(node):
+                return self.idf_aliases[node.token]
+
+        # Determine type of expression based on first child node
+        first = node.children[0]
+        if self.is_literal(first):
+            return self.lit_aliases[first.token] + '()'
+        elif self.is_ident(first):
+            return self.idf_aliases[first.token]
+        elif first.node_type == 8: # atom-op check
+            fact = self.gen_expr(node.children[1])
+            return '_not({fact})'
+        else:
+            # TODO account for multiple unary ops
+            #return '(ARITH EXPRESSION)'
+            factors = []
+            subexpr_idx = 1
+            fact = self.gen_expr(first)
+
+            # Enforce left-branching order
+            while subexpr_idx < len(node.children):
+                unary_fn = self.unary_fns[node.children[subexpr_idx].token]
+                subexpr_idx += 1
+                factors.append(unary_fn)
+                factors.append('(')
+                factors.append(fact)
+                factors.append(', ')
+
+                fact = self.gen_expr(node.children[subexpr_idx])
+                factors.append(next_fact)
+                subexpr_idx += 1
+
+            # Add right parentheses
+            rparen_count = 0
+            for f in factors:
+                if f == '(':
+                    rparen_count += 1
+
+            return ''.join(factors) + (')' * rparen_count)
 
 
     def gen_cond(self, node, depth):
-        # TODO
-        pass
+        expr1 = node.children[0]
+        op = node.children[1]
+        expr2 = node.children[2]
+
+        cond_var = self.next_local()
+        local1 = self.next_local()
+        local2 = self.next_local()
+
+        expr_str1 = self.gen_expr(expr1)
+        expr_str2 = self.gen_expr(expr2)
+
+        self.add_line(('  ') * depth + f'{local1} = {expr_str1}')
+        self.add_line(('  ') * depth + f'{local2} = {expr_str2}')
+
+        cmp_fn = self.cmp_fns[op.token]
+        self.add_line(('  ') * depth + f'{cond_var} = {cmp_fn}({local1}, {local2})')
+        return cond_var
 
 
     def gen_ifstmt(self, node, depth):
-        self.gen_cond(node.children[0], depth)
+        cond_var = self.gen_cond(node.children[0], depth) 
         #self.add_line(('\t' * depth) + cond_str)
-        cond_var = self.next_local()
+        #cond_var = self.next_local()
         check_var = self.next_local()
         self.add_line(('  ' * depth) + f'for {check_var} in range({cond_var}):')
         self.gen_block(node.children[1], depth + 1)
@@ -88,32 +166,48 @@ class CodeGenerator:
     def gen_asgstmt(self, node, depth):
         idf = node.children[0]
         op = node.children[1]
-        expr = node.children[2]
-        if self.is_literal(expr.children[0]):
-            idf_alias = self.idf_aliases[idf.token]
-            op_fn = self.assign_fns[op.token]
+        expr = node.children[2].children[0]
+        idf_alias = self.idf_aliases[idf.token]
+        op_fn = self.assign_fns[op.token]
+        if self.is_literal(expr):
             lit_fn = self.lit_aliases[expr.token]
             self.add_line(('  ' * depth) +
                             f'{idf_alias} = {op_fn}({idf_alias}, {lit_fn}())')
         else:
-            # TODO copy expr to lit
-            pass
+            expr_str = self.gen_expr(expr)
+            self.add_line(('  ' * depth) +
+                            f'{idf_alias} = {op_fn}({idf_alias}, {expr_str})')
 
 
     def gen_forstmt(self, node, depth):
+        # Alg for compiling a for statement:
+        # - From FOR node, get start/stop/step
+        # - Compute input to range function: floor((stop - start) / step)
+        # - At start of loop, recover true idx: idf = start <op> (i * step)
+        # - Compile block w/ additional indent
+
         asg = node.children[0]
         cond = node.children[1]
         incr = node.children[2]
-        op = incr.children[1].token
+        op_fn = self.assign_fns[incr.children[1].token]
         block = node.children[3]
 
         loop_idx = self.next_local()
+        true_idx = self.idf_aliases[incr.children[0].token]
         start = self.gen_expr(asg.children[2])
         stop = self.gen_expr(cond.children[2])
         step = self.gen_expr(incr.children[2])
 
-        # ...
-        self.gen_block()
+        range_arg = self.next_local()
+        set_range = f'{range_arg} = _div(_sub({stop}, {start}), {step})'
+        self.add_line(('  ' * depth) + set_range)
+
+        for_str = f'for {loop_idx} in range({range_arg}):'
+        self.add_line(('  ' * depth) + for_str)
+        recover_idx_str = f'{true_idx} = {op_fn}({start}, _mul({loop_idx}, {step}))'
+        self.add_line(('  ' * (depth + 2)) + recover_idx_str)
+
+        self.gen_block(block, depth + 1)
 
 
     def gen_stmt(self, node, depth):
