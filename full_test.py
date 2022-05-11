@@ -9,5 +9,8 @@ with open('test.txt', 'r') as src:
     parser.parse()
     parser.print_ast()
     cgen = CodeGenerator(parser.get_ast(), swap_dict(identifiers))
-    cgen.generate()
+    output = cgen.generate()
+    cgen.print_info()
+    print('\n===== FULL OUTPUT =====')
+    print(output)
 

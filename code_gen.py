@@ -23,6 +23,7 @@ class CodeGenerator:
         self.lit_aliases = dict()  # { int : str }
         self.curr_local = 0
         self.lines = ['def main():']
+        self.reserved_fns = set()
 
         self.assign_fns = {
             EQ : '_copy',
@@ -78,6 +79,18 @@ class CodeGenerator:
         elif len(node.children) == 0: return
         for child in node.children:
             self.collect_aliases(child)
+
+
+    def reserve_literals(self):
+        temp_lines = []
+        for (val, lit) in self.lit_aliases.items():
+            temp_lines.append(f'def {lit}():')
+            temp_lines.append(f'    _temp = 0')
+            for i in range(val):
+                temp_lines.append(f'    _temp += 1')
+            temp_lines.append(f'    return temp')
+        temp_lines.append('\n')
+        return '\n'.join(temp_lines)
 
 
     def is_literal(self, node):
@@ -230,7 +243,12 @@ class CodeGenerator:
     def generate(self):
         self.collect_aliases(self.root)
         self.gen_block(self.root, 1)
-        self.print_info()
+
+        main_code = '\n'.join(self.lines)
+        reserved_lit_code = self.reserve_literals()
+
+        full_code = [reserved_lit_code, main_code]
+        return '\n'.join(full_code)
 
 
     def print_info(self):
