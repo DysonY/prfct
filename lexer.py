@@ -1,4 +1,6 @@
 # TODO line_idx is not updated correctly on blank lines
+# TODO lex integer literals as their negation
+# negative number handling?
 
 from tokens import *
 
@@ -40,7 +42,8 @@ class Lexer:
         self.code_str = code_str
         self.line_idx = 0
         self.char_idx = 0
-        self.identifiers = set()
+        self.next_idf = 100
+        self.identifiers = dict()
         self.eof_reached = False
         self.reserved = {
             'if' : IF, 
@@ -94,8 +97,10 @@ class Lexer:
         if self.is_reserved(idf):
             self.tokens.append(self.reserved[idf])
         else:
-            self.identifiers.add(idf)
-            self.tokens.append(idf)
+            if idf not in self.identifiers.keys():
+                self.identifiers[idf] = self.next_idf
+                self.next_idf += 1
+            self.tokens.append(self.identifiers[idf])
 
 
     def match_bracket(self):
@@ -131,7 +136,8 @@ class Lexer:
             if is_ident_start(self.code_str[self.char_idx]):
                 print(self.code_str[self.char_idx])
                 self.lex_error('-> Invalid literal')
-        self.tokens.append(''.join(digits))
+        lit = int(''.join(digits)) * -1
+        self.tokens.append(lit)
 
 
     def lex(self):
@@ -157,16 +163,25 @@ class Lexer:
             else:
                 self.char_idx += 1
         self.print_info()
+        return self.tokens, self.identifiers
 
 
     def print_info(self):
+        print(self.tokens)
         print('Lines:', self.line_idx)
         print('Identifiers:', self.identifiers)
-        print('Tokens:', [str_of_token(t) for t in self.tokens])
+        print('Tokens: ', end='')
+        token_strs = []
+        for t in self.tokens:
+            if t in self.identifiers.values():
+                token_strs.append('IDF')
+            else:
+                token_strs.append(str_of_token(t))
+        print(token_strs)
         print(self.code_str)
 
 
-with open('test.txt', 'r') as src:
-    lexer = Lexer(src.read())
-    lexer.lex()
+#with open('test.txt', 'r') as src:
+#    lexer = Lexer(src.read())
+#    lexer.lex()
 

@@ -2,7 +2,7 @@
 # expressions
 LIT = 0
 INT = 1
-IDF = 2
+IDF = 100
 
 # ctrl flow
 IF = 10
@@ -41,6 +41,9 @@ NOT = 60
 
 # separator
 SEMI = 70
+
+# reserved
+NONTERM = 99
 
 ## string representations of tokens ##
 
@@ -88,6 +91,7 @@ op_chars = {
     '+', '-', '*', '/'
 }
 
+
 ops = {
     '=' : EQ,
     '==' : EQEQ,
@@ -106,6 +110,10 @@ ops = {
     '*=' : TIMEQ,
     '/=' : DIVEQ
 }
+
+
+unary_ops = ['+', '-', '*', '/']
+assign_ops = ['=', '+=', '-=', '*=', '/=']
 
 
 def str_of_token(token):

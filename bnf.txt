@@ -1,6 +1,10 @@
-statement ::= ident, assign-op, expression
-            | "if", condition, "{", { statement }, "}"
-            | "for", statement, ";", condition, ";", expression
+block ::= { statement }
+
+statement ::= [ "int" ], ident, assign-op, expression, ";"
+            | "if", "(", condition, ")" "{", block, "}"
+            | "for", "(", statement, ";", condition, ";", expression, ")", "{", block , "}"
+
+loop-step = ident, assign-op, expression
 
 condition ::= expression, cmp-op, expression
 
