@@ -67,9 +67,12 @@ class Parser:
             return Node(10, -1 * self.prev, [])
         elif self.accept(LPAREN):
             expr = self.expression()
-            expect(RPAREN)
+            self.expect(RPAREN)
             return expr
         else:
+            if self.prev == IDF:
+                self.next_sym()
+                return Node(9, self.prev, [])
             self.parse_error(f'Syntax error: ill-formed factor')
             self.next_sym()
             return None
@@ -87,9 +90,10 @@ class Parser:
             subexprs.append(fact)
             while self.sym in {PLUS, MINUS, TIMES, DIV}:
                 unary_op = Node(7, self.sym, [])
+                self.next_sym()
                 fact_next = self.factor()
-                sub_exprs.append(unary_op)
-                sub_exprs.append(fact_next)
+                subexprs.append(unary_op)
+                subexprs.append(fact_next)
             return Node(3, NONTERM, subexprs)
 
 

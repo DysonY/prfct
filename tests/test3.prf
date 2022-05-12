@@ -1,0 +1,9 @@
+int prev1 = 0;
+int prev2 = 0;
+int fibn = 1;
+
+for (int i = 0; i < 10; i += 1) {
+    prev2 = prev1;
+    prev1 = curr;
+    fibn = (prev1 + prev2);
+}

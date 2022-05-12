@@ -162,13 +162,16 @@ class Lexer:
                 self.match_literal()
             else:
                 self.char_idx += 1
-        self.print_info()
+        #self.print_info()
         return self.tokens, self.identifiers
 
 
-    def print_info(self):
+    def print_source(self):
         print('===== SOURCE CODE =====')
         print(self.code_str)
+
+
+    def print_info(self):
         print('===== LEXICAL ANALYSIS =====')
         print('Lines:', self.line_idx)
         print('Identifiers:', self.identifiers)

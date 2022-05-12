@@ -103,3 +103,36 @@ def _neq(x, y):
     c = _not(_eq(x, y))
     return c
 
+
+def _lita():
+    _temp = 0
+    return temp
+def _litb():
+    _temp = 0
+    _temp += 1
+    return temp
+def _litba():
+    _temp = 0
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    _temp += 1
+    return temp
+
+
+def main():
+    _idfprev1 = _copy(_idfprev1, _lita())
+    _idfprev2 = _copy(_idfprev2, _lita())
+    _idffibn = _copy(_idffibn, _litb())
+    _locb = _div(_sub(_litba(), _lita()), _litb())
+    for _loca in range(_locb):
+        _idfi = _copyadd(_lita(), _mul(_loca, _litb()))
+        _idfprev2 = _copy(_idfprev2, _idfprev1)
+        _idfprev1 = _copy(_idfprev1, _idfcurr)
+        _idffibn = _copy(_idffibn, _add(_idfprev1, _idfprev2))

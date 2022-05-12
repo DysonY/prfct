@@ -1,0 +1,6 @@
+int i = 2;
+int out = 0;
+for (int k = 10; k > 0; k -= 1) {
+    out += k;
+    out *= i;
+}

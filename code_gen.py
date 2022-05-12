@@ -118,8 +118,9 @@ class CodeGenerator:
         first = node.children[0]
         if self.is_literal(first):
             return self.lit_aliases[first.token] + '()'
-        elif self.is_ident(first):
-            return self.idf_aliases[first.token]
+        #elif self.is_ident(first):
+        #    print(f'--DEBUG {first.token}')
+        #    return self.idf_aliases[first.token]
         elif first.node_type == 8: # atom-op check
             fact = self.gen_expr(node.children[1])
             self.reserve('_not')
@@ -140,7 +141,7 @@ class CodeGenerator:
                 factors.append(fact)
                 factors.append(', ')
 
-                fact = self.gen_expr(node.children[subexpr_idx])
+                next_fact = self.gen_expr(node.children[subexpr_idx])
                 factors.append(next_fact)
                 subexpr_idx += 1
 
@@ -255,9 +256,15 @@ class CodeGenerator:
 
         main_code = '\n'.join(self.lines)
         reserved_lit_code = self.reserve_literals()
+        stdlib_code = self.get_lib()
 
-        full_code = [reserved_lit_code, main_code]
+        full_code = [stdlib_code, reserved_lit_code, main_code]
         return '\n'.join(full_code)
+
+
+    def get_lib(self):
+        with open('reserved.py', 'r') as src:
+            return src.read()
 
 
     def print_info(self):
